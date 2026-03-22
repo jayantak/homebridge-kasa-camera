@@ -1,0 +1,49 @@
+{
+  "pluginAlias": "KasaCamera",
+  "pluginType": "platform",
+  "singular": true,
+  "strictValidation": false,
+  "schema": {
+    "type": "object",
+    "required": ["cameras"],
+    "properties": {
+      "name": {
+        "title": "Platform Name",
+        "type": "string",
+        "default": "Kasa Camera"
+      },
+      "cameras": {
+        "title": "Cameras",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["name", "ip", "kasaEmail", "kasaPassword"],
+          "properties": {
+            "name": {
+              "title": "Camera Name",
+              "type": "string",
+              "description": "Display name in HomeKit"
+            },
+            "ip": {
+              "title": "Camera IP Address",
+              "type": "string",
+              "format": "ipv4",
+              "description": "Local IP address of the Kasa camera"
+            },
+            "kasaEmail": {
+              "title": "Kasa Account Email",
+              "type": "string",
+              "format": "email",
+              "description": "TP-Link/Kasa account email"
+            },
+            "kasaPassword": {
+              "title": "Kasa Account Password",
+              "type": "string",
+              "description": "TP-Link/Kasa account password"
+            }
+          }
+        }
+      }
+    }
+  }
+}

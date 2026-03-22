@@ -136,43 +136,43 @@ export class KasaCameraStreamDelegate implements CameraStreamingDelegate {
     const videoCryptoKey = Buffer.concat([videoSrtpKey, videoSrtpSalt]).toString('base64');
     const audioCryptoKey = Buffer.concat([audioSrtpKey, audioSrtpSalt]).toString('base64');
 
+    const vWidth = videoConfig.width;
+    const vHeight = videoConfig.height;
+    const vBitrate = Math.max(videoConfig.max_bit_rate, 1500);
+
     const args = [
       '-rtsp_transport', 'tcp',
+      '-fflags', '+genpts+nobuffer',
+      '-flags', 'low_delay',
       '-i', this.rtspUrl,
 
-      // Video output
-      '-map', '0:v',
-      '-vcodec', 'copy',
+      // Video: re-encode with low-latency settings
       '-an',
+      '-vcodec', 'libx264',
+      '-pix_fmt', 'yuv420p',
+      '-preset', 'ultrafast',
+      '-tune', 'zerolatency',
+      '-vf', `scale=${vWidth}:${vHeight}`,
+      '-b:v', `${vBitrate}k`,
+      '-maxrate', `${vBitrate}k`,
+      '-bufsize', `${vBitrate}k`,
+      '-g', '30',
+      '-r', '15',
       '-payload_type', String(videoConfig.pt),
       '-ssrc', String(videoSsrc),
       '-f', 'rtp',
       '-srtp_out_suite', 'AES_CM_128_HMAC_SHA1_80',
       '-srtp_out_params', videoCryptoKey,
       `srtp://${targetAddress}:${videoPort}?rtcpport=${videoPort}&pkt_size=1316`,
-
-      // Audio output
-      '-map', '0:a',
-      '-acodec', 'libopus',
-      '-application', 'lowdelay',
-      '-ac', '1',
-      '-ar', '24000',
-      '-b:a', '24k',
-      '-payload_type', String(audioConfig.pt),
-      '-ssrc', String(audioSsrc),
-      '-f', 'rtp',
-      '-srtp_out_suite', 'AES_CM_128_HMAC_SHA1_80',
-      '-srtp_out_params', audioCryptoKey,
-      `srtp://${targetAddress}:${audioPort}?rtcpport=${audioPort}&pkt_size=188`,
     ];
 
     this.log.info('Starting stream for', this.cameraName);
-    this.log.debug('ffmpeg args:', args.join(' '));
+    this.log.info('ffmpeg args:', args.join(' '));
 
     const ffmpeg = spawn('ffmpeg', args, { env: process.env });
 
     ffmpeg.stderr.on('data', (data: Buffer) => {
-      this.log.debug('[ffmpeg stream]', data.toString().trim());
+      this.log.info('[ffmpeg stream]', data.toString().trim());
     });
 
     ffmpeg.on('error', (err) => {
@@ -180,7 +180,7 @@ export class KasaCameraStreamDelegate implements CameraStreamingDelegate {
     });
 
     ffmpeg.on('close', (code) => {
-      this.log.debug('ffmpeg stream exited with code', code);
+      this.log.info('ffmpeg stream exited with code', code);
       this.ffmpegProcesses.delete(sessionId);
     });
 

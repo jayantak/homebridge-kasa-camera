@@ -3,7 +3,7 @@
   "displayName": "Kasa Camera",
   "type": "module",
   "version": "0.1.0",
-  "description": "Homebridge plugin for TP-Link Kasa cameras with live streaming and snapshots via go2rtc",
+  "description": "Homebridge plugin for TP-Link Kasa cameras with live streaming and snapshots",
   "author": "Jay Kurumathur",
   "license": "Apache-2.0",
   "homepage": "https://github.com/jayantak/homebridge-kasa-camera#readme",

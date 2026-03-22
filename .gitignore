@@ -14,8 +14,7 @@ dist/
 # Claude Code local settings
 .claude/
 
-# go2rtc binary (downloaded at runtime)
-validation/go2rtc
+# Validation artifacts
 validation/snapshot.jpg
 
 # Environment / secrets

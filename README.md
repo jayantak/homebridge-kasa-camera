@@ -4,10 +4,10 @@ Homebridge plugin for TP-Link Kasa cameras. Exposes your Kasa cameras as HomeKit
 
 ## How it works
 
-The plugin manages a [go2rtc](https://github.com/AlexxIT/go2rtc) process that connects to your Kasa camera using its proprietary HTTPS streaming protocol. The stream is then re-encoded via ffmpeg and sent to HomeKit over SRTP.
+The plugin connects ffmpeg directly to your Kasa camera's HTTPS streaming endpoint (port 19443). The stream is re-encoded and sent to HomeKit over SRTP.
 
 ```
-Kasa Camera (port 19443) → go2rtc (kasa:// protocol) → RTSP → ffmpeg → SRTP → HomeKit
+Kasa Camera (port 19443) → ffmpeg (direct HTTPS) → SRTP → HomeKit
 ```
 
 ## Prerequisites
@@ -69,7 +69,7 @@ All Kasa cameras that expose the HTTPS streaming endpoint on port 19443 should w
 - **Audio** is not yet supported (camera's PCM mulaw format requires transcoding work)
 - **Motion detection** is not yet supported
 - **Auto-discovery** is not supported — cameras must be configured manually
-- go2rtc is downloaded automatically on first run (~5MB binary)
+- **First stream start** may take a few seconds while ffmpeg connects to the camera
 
 ## Troubleshooting
 
@@ -81,10 +81,6 @@ All Kasa cameras that expose the HTTPS streaming endpoint on port 19443 should w
 **ffmpeg not found**
 - Install ffmpeg: `sudo apt install ffmpeg` (Debian/Ubuntu) or `brew install ffmpeg` (macOS)
 - Ensure ffmpeg is built with libx264 support: `ffmpeg -encoders | grep libx264`
-
-**go2rtc download fails**
-- Check internet connectivity from the Homebridge host
-- The binary is downloaded from GitHub releases — ensure github.com is accessible
 
 ## License
 

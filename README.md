@@ -1,5 +1,8 @@
 # homebridge-kasa-camera
 
+[![Build](https://github.com/jayantak/homebridge-kasa-camera/actions/workflows/build.yml/badge.svg)](https://github.com/jayantak/homebridge-kasa-camera/actions/workflows/build.yml)
+[![npm](https://img.shields.io/npm/v/homebridge-kasa-camera)](https://www.npmjs.com/package/homebridge-kasa-camera)
+
 Homebridge plugin for TP-Link Kasa cameras. Exposes your Kasa cameras as HomeKit cameras with live video streaming and snapshot thumbnails.
 
 ## How it works

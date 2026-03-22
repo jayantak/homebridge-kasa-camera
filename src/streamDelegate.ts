@@ -121,20 +121,15 @@ export class KasaCameraStreamDelegate implements CameraStreamingDelegate {
     request: StartStreamRequest,
     callback: StreamRequestCallback,
   ): void {
-    const { request: session, videoSsrc, audioSsrc } = sessionInfo;
+    const { request: session, videoSsrc } = sessionInfo;
     const videoConfig = request.video;
-    const audioConfig = request.audio;
 
     const targetAddress = session.targetAddress;
     const videoPort = session.video.port;
-    const audioPort = session.audio.port;
     const videoSrtpKey = session.video.srtp_key;
     const videoSrtpSalt = session.video.srtp_salt;
-    const audioSrtpKey = session.audio.srtp_key;
-    const audioSrtpSalt = session.audio.srtp_salt;
 
     const videoCryptoKey = Buffer.concat([videoSrtpKey, videoSrtpSalt]).toString('base64');
-    const audioCryptoKey = Buffer.concat([audioSrtpKey, audioSrtpSalt]).toString('base64');
 
     const vWidth = videoConfig.width;
     const vHeight = videoConfig.height;

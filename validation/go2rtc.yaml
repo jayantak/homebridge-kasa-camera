@@ -1,3 +1,0 @@
-streams:
-  kasa_cam:
-    - kasa://<KASA_EMAIL>:<BASE64_PASSWORD>@<CAMERA_IP>:19443/https/stream/mixed

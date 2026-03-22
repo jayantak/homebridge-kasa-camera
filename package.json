@@ -2,7 +2,7 @@
   "name": "homebridge-kasa-camera",
   "displayName": "Kasa Camera",
   "type": "module",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Homebridge plugin for TP-Link Kasa cameras with live streaming and snapshots",
   "author": "Jay Kurumathur",
   "license": "Apache-2.0",

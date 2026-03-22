@@ -42,6 +42,7 @@ export class KasaCameraStreamDelegate implements CameraStreamingDelegate {
   handleSnapshotRequest(request: SnapshotRequest, callback: SnapshotRequestCallback): void {
     const args = [
       '-tls_verify', '0',
+      '-f', 'h264',
       '-i', this.streamUrl,
       '-frames:v', '1',
       '-f', 'image2',
@@ -142,6 +143,7 @@ export class KasaCameraStreamDelegate implements CameraStreamingDelegate {
 
     const args = [
       '-tls_verify', '0',
+      '-f', 'h264',
       '-fflags', '+genpts+nobuffer',
       '-flags', 'low_delay',
       '-i', this.streamUrl,

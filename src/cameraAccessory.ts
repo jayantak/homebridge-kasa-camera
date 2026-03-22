@@ -2,24 +2,23 @@
 import type { PlatformAccessory } from 'homebridge';
 import type { KasaCameraPlatform } from './platform.js';
 import { KasaCameraStreamDelegate } from './streamDelegate.js';
-import { sanitizeCameraName } from './go2rtcManager.js';
 
 export class KasaCameraAccessory {
   constructor(
     private readonly platform: KasaCameraPlatform,
     private readonly accessory: PlatformAccessory,
   ) {
-    const cameraName = sanitizeCameraName(accessory.context.device.name);
-
     this.accessory.getService(this.platform.api.hap.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.api.hap.Characteristic.Manufacturer, 'TP-Link')
       .setCharacteristic(this.platform.api.hap.Characteristic.Model, 'Kasa Camera')
       .setCharacteristic(this.platform.api.hap.Characteristic.SerialNumber, accessory.context.device.ip);
 
+    const device = accessory.context.device;
     const delegate = new KasaCameraStreamDelegate(
       this.platform.api.hap,
       this.platform.log,
-      cameraName,
+      accessory.displayName,
+      { ip: device.ip, kasaEmail: device.kasaEmail, kasaPassword: device.kasaPassword },
     );
 
     const controller = new this.platform.api.hap.CameraController({

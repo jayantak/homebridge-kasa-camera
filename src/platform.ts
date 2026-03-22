@@ -1,12 +1,11 @@
 import type { API, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig } from 'homebridge';
 
 import { KasaCameraAccessory } from './cameraAccessory.js';
-import { type CameraConfig, Go2RtcManager } from './go2rtcManager.js';
+import type { CameraConfig } from './settings.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
 export class KasaCameraPlatform implements DynamicPlatformPlugin {
   private readonly accessories: Map<string, PlatformAccessory> = new Map();
-  private go2rtcManager?: Go2RtcManager;
 
   constructor(
     public readonly log: Logging,
@@ -18,10 +17,6 @@ export class KasaCameraPlatform implements DynamicPlatformPlugin {
     this.api.on('didFinishLaunching', () => {
       this.launchCameras();
     });
-
-    this.api.on('shutdown', () => {
-      this.go2rtcManager?.stop();
-    });
   }
 
   configureAccessory(accessory: PlatformAccessory): void {
@@ -29,24 +24,13 @@ export class KasaCameraPlatform implements DynamicPlatformPlugin {
     this.accessories.set(accessory.UUID, accessory);
   }
 
-  private async launchCameras(): Promise<void> {
+  private launchCameras(): void {
     const cameras: CameraConfig[] = this.config.cameras || [];
 
     if (cameras.length === 0) {
       this.log.warn('No cameras configured');
       return;
     }
-
-    // Start go2rtc
-    this.go2rtcManager = new Go2RtcManager(
-      this.log,
-      cameras,
-      this.api.user.storagePath(),
-    );
-    await this.go2rtcManager.start();
-
-    // Give go2rtc a moment to start
-    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Register camera accessories
     const discoveredUUIDs: string[] = [];

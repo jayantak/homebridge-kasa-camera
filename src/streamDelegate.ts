@@ -12,7 +12,6 @@ import type {
   StreamRequestCallback,
 } from 'homebridge';
 import { spawn, type ChildProcess } from 'node:child_process';
-import { GO2RTC_RTSP_PORT } from './settings.js';
 
 interface SessionInfo {
   request: PrepareStreamRequest;
@@ -20,24 +19,30 @@ interface SessionInfo {
   audioSsrc: number;
 }
 
+export function buildDirectStreamUrl(camera: { ip: string; kasaEmail: string; kasaPassword: string }): string {
+  const encodedEmail = encodeURIComponent(camera.kasaEmail);
+  const encodedPassword = encodeURIComponent(camera.kasaPassword);
+  return `https://${encodedEmail}:${encodedPassword}@${camera.ip}:19443/https/stream/mixed?video=h264`;
+}
+
 export class KasaCameraStreamDelegate implements CameraStreamingDelegate {
   private ffmpegProcesses: Map<string, ChildProcess> = new Map();
   private pendingSessions: Map<string, SessionInfo> = new Map();
+  private readonly streamUrl: string;
 
   constructor(
     private readonly hap: HAP,
     private readonly log: Logging,
     private readonly cameraName: string,
-  ) {}
-
-  private get rtspUrl(): string {
-    return `rtsp://localhost:${GO2RTC_RTSP_PORT}/${this.cameraName}`;
+    camera: { ip: string; kasaEmail: string; kasaPassword: string },
+  ) {
+    this.streamUrl = buildDirectStreamUrl(camera);
   }
 
   handleSnapshotRequest(request: SnapshotRequest, callback: SnapshotRequestCallback): void {
     const args = [
-      '-rtsp_transport', 'tcp',
-      '-i', this.rtspUrl,
+      '-tls_verify', '0',
+      '-i', this.streamUrl,
       '-frames:v', '1',
       '-f', 'image2',
       '-vf', `scale=${request.width}:${request.height}`,
@@ -136,10 +141,10 @@ export class KasaCameraStreamDelegate implements CameraStreamingDelegate {
     const vBitrate = Math.max(videoConfig.max_bit_rate, 1500);
 
     const args = [
-      '-rtsp_transport', 'tcp',
+      '-tls_verify', '0',
       '-fflags', '+genpts+nobuffer',
       '-flags', 'low_delay',
-      '-i', this.rtspUrl,
+      '-i', this.streamUrl,
 
       // Video: re-encode with low-latency settings
       '-an',
@@ -162,12 +167,12 @@ export class KasaCameraStreamDelegate implements CameraStreamingDelegate {
     ];
 
     this.log.info('Starting stream for', this.cameraName);
-    this.log.info('ffmpeg args:', args.join(' '));
+    this.log.debug('ffmpeg args:', args.map(a => a.startsWith('https://') ? 'https://***@***' : a).join(' '));
 
     const ffmpeg = spawn('ffmpeg', args, { env: process.env });
 
     ffmpeg.stderr.on('data', (data: Buffer) => {
-      this.log.info('[ffmpeg stream]', data.toString().trim());
+      this.log.debug('[ffmpeg stream]', data.toString().trim());
     });
 
     ffmpeg.on('error', (err) => {
